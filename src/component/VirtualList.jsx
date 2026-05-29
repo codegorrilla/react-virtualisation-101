@@ -1,76 +1,62 @@
-import { List } from "react-window";
+import React from "react";
+// Explicitly use FixedSizeList from the stable version
+import { FixedSizeList as List } from "react-window";
 
-// 1. Generate 1,000 fake users
-const items = Array.from({ length: 1000 }, (_, index) => ({
+// 1. Generate 1,000 mock data items
+const USER_DATA = Array.from({ length: 1000 }, (_, index) => ({
   id: index,
   name: `User Profile ${index + 1}`,
-  status: index % 2 === 0 ? "Active" : "Pending",
+  email: `user${index + 1}@example.com`,
 }));
 
-// 2. Define the Row Component
-// CRITICAL: You must pass 'style' to your DOM element so react-window can position it.
+// 2. Define the individual Row Component
+// CRITICAL: You MUST spread the 'style' prop onto your outermost row container!
 const Row = ({ index, style }) => {
-  const item = items[index];
+  const user = USER_DATA[index];
 
   return (
     <div
       style={{
-        ...style, // Apply the absolute positioning provided by react-window
+        ...style, // Absolutely critical for positioning layout
         display: "flex",
         alignItems: "center",
-        paddingLeft: "20px",
-        backgroundColor: index % 2 ? "#f8f9fa" : "#ffffff",
+        padding: "0 15px",
         borderBottom: "1px solid #eee",
+        boxSizing: "border-box",
+        backgroundColor: index % 2 === 0 ? "#fff" : "#f9f9f9",
       }}
     >
-      <span style={{ fontWeight: "bold", marginRight: "10px" }}>
-        #{item.id}
-      </span>
-      <span style={{ flex: 1 }}>{item.name}</span>
-      <span
-        style={{
-          padding: "4px 8px",
-          borderRadius: "12px",
-          fontSize: "0.8em",
-          backgroundColor: item.status === "Active" ? "#e6fffa" : "#fff5f5",
-          color: item.status === "Active" ? "#047857" : "#c53030",
-        }}
-      >
-        {item.status}
-      </span>
+      <strong style={{ marginRight: "15px" }}>#{user.id}</strong>
+      <span style={{ flex: 1 }}>{user.name}</span>
+      <span style={{ color: "#666" }}>{user.email}</span>
     </div>
   );
 };
 
-// 3. The List Component
+// 3. Main Export Component
 export default function VirtualList() {
   return (
     <div
       style={{
-        border: "2px solid #ddd",
-        borderRadius: "8px",
-        width: "350px",
-        margin: "0 auto",
+        maxWidth: "500px",
+        margin: "40px auto",
+        fontFamily: "sans-serif",
       }}
     >
-      <h3
-        style={{
-          padding: "10px",
-          margin: 0,
-          borderBottom: "1px solid #ccc",
-          background: "#eee",
-        }}
-      >
-        React 19 Virtual List
-      </h3>
+      <h3 style={{ marginBottom: "10px" }}>User Directory (Virtualized)</h3>
 
+      {/* 
+        In v1.8.11, the row component is passed as a child function, 
+        and properties are named itemCount and itemSize.
+      */}
       <List
-        height={400}
-        width="100%"
-        rowCount={items.length}
-        rowHeight={50}
-        rowComponent={Row} // Pass it here as a configuration prop
-      />
+        height={400} // Height of the window container
+        width="100%" // Width of the window container
+        itemCount={USER_DATA.length} // Total records
+        itemSize={50} // Height of each individual row
+      >
+        {Row}
+      </List>
     </div>
   );
 }
